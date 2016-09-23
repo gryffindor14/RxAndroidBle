@@ -29,11 +29,11 @@ import rx.Observable;
 
 class RxBleClientImpl extends RxBleClient {
 
-    private final RxBleRadio rxBleRadio;
+    final RxBleRadio rxBleRadio;
     private final UUIDUtil uuidUtil;
     private final RxBleDeviceProvider rxBleDeviceProvider;
     private final Map<Set<UUID>, Observable<RxBleScanResult>> queuedScanOperations = new HashMap<>();
-    private final RxBleAdapterWrapper rxBleAdapterWrapper;
+    final RxBleAdapterWrapper rxBleAdapterWrapper;
     private final Observable<BleAdapterState> rxBleAdapterStateObservable;
     private final LocationServicesStatus locationServicesStatus;
 
@@ -112,22 +112,22 @@ class RxBleClientImpl extends RxBleClient {
         }
     }
 
-    private boolean checkIfLocationAccessIsEnabledIfRequired() {
+    boolean checkIfLocationAccessIsEnabledIfRequired() {
         return locationServicesStatus.isLocationProviderRequired() && !locationServicesStatus.isLocationProviderEnabled();
     }
 
-    private boolean checkIfLocationPermissionIsGrantedIfRequired() {
+    boolean checkIfLocationPermissionIsGrantedIfRequired() {
         return locationServicesStatus.isLocationProviderRequired() && !locationServicesStatus.isLocationPermissionApproved();
     }
 
-    private <T> Observable<T> bluetoothAdapterOffExceptionObservable() {
+    <T> Observable<T> bluetoothAdapterOffExceptionObservable() {
         return rxBleAdapterStateObservable
                 .filter(state -> state != BleAdapterState.STATE_ON)
                 .first()
                 .flatMap(status -> Observable.error(new BleScanException(BleScanException.BLUETOOTH_DISABLED)));
     }
 
-    private RxBleScanResult convertToPublicScanResult(RxBleInternalScanResult scanResult) {
+    RxBleScanResult convertToPublicScanResult(RxBleInternalScanResult scanResult) {
         final BluetoothDevice bluetoothDevice = scanResult.getBluetoothDevice();
         final RxBleDevice bleDevice = getBleDevice(bluetoothDevice.getAddress());
         return new RxBleScanResult(bleDevice, scanResult.getRssi(), scanResult.getScanRecord());
